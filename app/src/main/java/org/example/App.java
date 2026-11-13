@@ -1,8 +1,14 @@
+
 package org.example;
+
+import javax.swing.SwingUtilities;
+
 import org.example.member3.OperationHistoryManager;
 import org.example.member3.OperationStack;
+import org.example.member3.OperationsUI;
 import org.example.member3.ReportGenerator;
-import org.example.member3.UndoManager;
+import org.example.member3.ReportsUI;
+import org.example.member3.SeatOperationManager;
 import org.example.models.Operation;
 import org.example.models.OperationResult;
 import org.example.models.SeatLocation;
@@ -10,105 +16,89 @@ import org.example.services.AllocationService;
 
 public class App {
 
-static class TestAllocationService implements AllocationService {
-    public OperationResult swapAllocations(
-            int examId, String usn1, String usn2) {
-        return new OperationResult(true, "Swap successful");
-    }
-public OperationResult reassignAllocation(
-        int examId, String usn, int hallId, int seatId) {
-    return new OperationResult(true, "Reassignment successful");
-}
-
-    public boolean restoreSwap(Operation operation) {
-        System.out.println("Attempting to undo swap...");
-        return false;
-    }
-
-    public boolean restoreReassignment(Operation operation) {
-        System.out.println("Attempting to undo reassignment...");
-        return true;
-    }
-
-    public SeatLocation getCurrentSeat(int examId, String usn) {
-        return null;
-    }
-}
     public static void main(String[] args) {
 
-        OperationStack stack = new OperationStack();
+        SwingUtilities.invokeLater(() -> {
 
-        stack.push(new Operation(
-            101,"SWAP", "USN001", "USN002",
-            1, 5, 5, 1
-        ));
+            // Temporary test service
+            AllocationService allocationService =
+                    new TestAllocationService();
 
-        stack.push(new Operation(
-            101,"REASSIGNMENT", "USN003", null,
-            3, -1, 8, -1
-        ));
+            // Create operation stack and history manager
+            OperationStack operationStack = new OperationStack();
 
-AllocationService allocationService = new TestAllocationService();
+            OperationHistoryManager historyManager =
+                    new OperationHistoryManager();
 
-UndoManager undoManager = new UndoManager(stack, allocationService);
+            // Create operation manager
+            SeatOperationManager operationManager =
+                    new SeatOperationManager(
+                            allocationService,
+                            operationStack,
+                            historyManager
+                    );
 
-        System.out.println("Undo count: " + undoManager.getUndoCount());
+            // Create report generator
+            ReportGenerator reportGenerator =
+                    new ReportGenerator(historyManager);
 
-        System.out.println("Undo successful: "
-                + undoManager.undoLastOperation());
+            // Open both GUIs
+            new OperationsUI(operationManager);
+            new ReportsUI(reportGenerator);
+        });
+    }
 
-        System.out.println("Undo count after undo: "
-                + undoManager.getUndoCount());
+    // TEMPORARY SERVICE FOR TESTING
+    static class TestAllocationService implements AllocationService {
 
-        System.out.println("Next operation: "
-                + undoManager.getLastOperation().getOperationType());
-    
+        @Override
+        public OperationResult swapAllocations(
+                int examId, String usn1, String usn2) {
 
-    OperationHistoryManager historyManager = new OperationHistoryManager();
+            return new OperationResult(
+                    true, "Swap successful! (Test mode)"
+            );
+        }
 
-historyManager.addHistory(
-    101, "SWAP", "USN001", "USN002",
-    1, 2, 2, 1
-);
+        @Override
+        public OperationResult reassignAllocation(
+                int examId, String usn, int hallId, int seatId) {
 
-historyManager.addHistory(
-    101, "REASSIGNMENT", "USN003", null,
-    3, -1, 8, -1
-);
+            return new OperationResult(
+                    true, "Reassignment successful! (Test mode)"
+            );
+        }
 
-historyManager.addHistory(
-    102, "REASSIGNMENT", "USN001", null,
-    5, -1, 9, -1
-);
+        @Override
+        public boolean restoreSwap(Operation operation) {
+            return true;
+        }
 
-System.out.println("Total history: " + historyManager.getAllHistory().size());
+        @Override
+        public boolean restoreReassignment(Operation operation) {
+            return true;
+        }
 
-System.out.println("Exam 101 history: "
-    + historyManager.getHistoryByExam(101).size());
+        @Override
+        public SeatLocation getCurrentSeat(int examId, String usn) {
 
-System.out.println("USN001 history: "
-    + historyManager.getHistoryByStudent("USN001").size());
-ReportGenerator reportGenerator = new ReportGenerator(historyManager);
+            if (usn == null) {
+                return null;
+            }
 
-System.out.println("Exam 101 total operations: "
-        + reportGenerator.getTotalOperations(101));
+            switch (usn.toUpperCase()) {
+                case "USN001":
+                    return new SeatLocation(1, 1, 1, 1);
 
-System.out.println("Exam 101 swaps: "
-        + reportGenerator.getTotalSwaps(101));
+                case "USN002":
+                    return new SeatLocation(1, 1, 2, 2);
 
-System.out.println("Exam 101 reassignments: "
-        + reportGenerator.getTotalReassignments(101));
+                case "USN003":
+                    return new SeatLocation(1, 1, 3, 3);
 
-System.out.println("Exam 101 undo operations: "
-        + reportGenerator.getTotalUndoOperations(101));
-
-System.out.println("USN001 total operations: "
-        + reportGenerator.getTotalOperationsByStudent("USN001"));
-
-System.out.println("USN001 swaps: "
-        + reportGenerator.getSwapsByStudent("USN001"));
-
-System.out.println("USN001 reassignments: "
-        + reportGenerator.getReassignmentsByStudent("USN001"));
-}
+                default:
+                    return null;
+            }
+        }
+    }
 }
