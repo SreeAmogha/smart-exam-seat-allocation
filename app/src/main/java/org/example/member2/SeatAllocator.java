@@ -12,7 +12,7 @@ public class SeatAllocator {
 
     private ConflictDetector conflictDetector;
     private List<Student> unallocatedStudents;
-
+    private AllocationDAO allocationDAO = new AllocationDAO();
     public SeatAllocator() {
         conflictDetector = new ConflictDetector();
         unallocatedStudents = new ArrayList<>();
@@ -170,5 +170,44 @@ public class SeatAllocator {
     }
 
     return remainingStudents;
+}
+public boolean saveAllocations(String examId, Hall hall) {
+
+    if (hall == null) {
+        return false;
+    }
+
+    boolean allSaved = true;
+
+    RowNode row = hall.getRows().getHead();
+
+    while (row != null) {
+
+        SeatNode seat = row.getSeatList().getHead();
+
+        while (seat != null) {
+
+            if (seat.isOccupied()) {
+
+                boolean saved = allocationDAO.saveAllocation(
+                    examId,
+                    hall.getHallId(),
+                    seat.getAllocatedUsn(),
+                    seat.getRowNumber(),
+                    seat.getSeatNumber()
+                );
+
+                if (!saved) {
+                    allSaved = false;
+                }
+            }
+
+            seat = seat.getNext();
+        }
+
+        row = row.getNext();
+    }
+
+    return allSaved;
 }
 }

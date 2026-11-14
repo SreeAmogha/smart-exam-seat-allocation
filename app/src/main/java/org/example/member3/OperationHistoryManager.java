@@ -1,72 +1,52 @@
+
 package org.example.member3;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+
 import java.util.List;
 
 import org.example.models.AllocationHistory;
 
 public class OperationHistoryManager {
 
-    private List<AllocationHistory> historyList;
-    private int nextHistoryId;
+    private final OperationHistoryDAO historyDAO;
+
     public OperationHistoryManager() {
-    historyList = new ArrayList<>();
-    nextHistoryId = 1;
+        historyDAO = new OperationHistoryDAO();
     }
+
     public void addHistory(
-        int examId,
-        String operationType,
-        String studentUSN1,
-        String studentUSN2,
-        int oldSeatId1,
-        int oldSeatId2,
-        int newSeatId1,
-        int newSeatId2) 
-        {       
-            AllocationHistory history = new AllocationHistory(
-            nextHistoryId,
-            examId,
-            operationType,
-            studentUSN1,
-            studentUSN2,
-            oldSeatId1,
-            oldSeatId2,
-            newSeatId1,
-            newSeatId2,
-            LocalDateTime.now());
-        historyList.add(history);
-        nextHistoryId++;
-        }
-    public List<AllocationHistory> getAllHistory()
-        {
-            return new ArrayList<>(historyList);
-        }
-    public List<AllocationHistory> getHistoryByExam(int examId) {
+            String examId,
+            String operationType,
+            String studentUSN1,
+            String studentUSN2,
+            String oldSeatId1,
+            String oldSeatId2,
+            String newSeatId1,
+            String newSeatId2) {
 
-        List<AllocationHistory> filteredHistory = new ArrayList<>();
-        for (AllocationHistory history : historyList) {
-            if (history.getExamId() == examId) {
-                filteredHistory.add(history);
-            }
+        boolean saved = historyDAO.saveHistory(
+                examId,
+                operationType,
+                studentUSN1,
+                studentUSN2,
+                oldSeatId1,
+                oldSeatId2,
+                newSeatId1,
+                newSeatId2);
+
+        if (!saved) {
+            System.out.println("Operation history could not be saved.");
         }
-        return filteredHistory;
     }
+
+    public List<AllocationHistory> getAllHistory() {
+        return historyDAO.getAllHistory();
+    }
+
+    public List<AllocationHistory> getHistoryByExam(String examId) {
+        return historyDAO.getHistoryByExam(examId);
+    }
+
     public List<AllocationHistory> getHistoryByStudent(String usn) {
-
-        List<AllocationHistory> filteredHistory = new ArrayList<>();
-
-            if (usn == null || usn.isBlank()) {
-                return filteredHistory;
-            }
-
-        for (AllocationHistory history : historyList) {
-
-            if (usn.equalsIgnoreCase(history.getStudentUSN1())
-                    || usn.equalsIgnoreCase(history.getStudentUSN2())) {
-
-                filteredHistory.add(history);
-            }
-        }
-        return filteredHistory;
-    }    
+        return historyDAO.getHistoryByStudent(usn);
+    }
 }

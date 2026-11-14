@@ -1,25 +1,38 @@
+
 package org.example.models;
-public class SeatLocation{
-    private int hallId;
+
+public class SeatLocation {
+
+    private String hallId;
     private int rowNumber;
     private int columnNumber;
-    private int seatId;
-    public SeatLocation(int hallId,int rowNumber, int columnNumber,int seatId){
-        this.hallId=hallId;
-        this.rowNumber=rowNumber;
-        this.columnNumber=columnNumber;
-        this.seatId=seatId;
+    private String seatId;
+
+    public SeatLocation(
+            String hallId,
+            int rowNumber,
+            int columnNumber,
+            String seatId) {
+
+        this.hallId = hallId;
+        this.rowNumber = rowNumber;
+        this.columnNumber = columnNumber;
+        this.seatId = seatId;
     }
-    public int getHallId(){
+
+    public String getHallId() {
         return hallId;
     }
-    public int getRowNumber(){
+
+    public int getRowNumber() {
         return rowNumber;
     }
-    public int getColumnNumber(){
+
+    public int getColumnNumber() {
         return columnNumber;
     }
-    public int getSeatId(){
+
+    public String getSeatId() {
         return seatId;
     }
 }
