@@ -52,10 +52,14 @@ public class HallManager {
                 hallId, hallName, numberOfRows, seatsPerRow
         );
 
-        hallMap.put(hallId, newHall);
+        if (!hallDAO.insertHall(hallId, hallName, numberOfRows, seatsPerRow)) {
+    System.out.println("Could not save hall to database.");
+    return false;
+}
 
-        System.out.println("Hall created successfully!");
-        return true;
+hallMap.put(hallId, newHall);
+System.out.println("Hall created and saved successfully!");
+return true;
     }
 
     // Find hall
