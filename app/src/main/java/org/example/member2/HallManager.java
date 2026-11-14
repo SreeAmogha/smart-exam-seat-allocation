@@ -1,9 +1,11 @@
+
 package org.example.member2;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class HallManager {
+
     private Map<String, Hall> hallMap;
     private HallDAO hallDAO;
 
@@ -12,59 +14,77 @@ public class HallManager {
         this.hallDAO = new HallDAO();
     }
 
+    // Add an existing hall
     public void addHall(Hall hall) {
-    if (hall == null) {
-        return;
+
+        if (hall == null || hall.getHallId() == null
+                || hallMap.containsKey(hall.getHallId())) {
+            System.out.println("Invalid hall or duplicate Hall ID.");
+            return;
+        }
+
+        hallMap.put(hall.getHallId(), hall);
     }
 
-    hallMap.put(hall.getHallId(), hall);
-}
-
+    // Get hall using its ID
     public Hall getHall(String hallId) {
         return hallMap.get(hallId);
     }
 
-    // Creates a hall with the given number of rows and seats per row.
-    public void createHall(
-        String hallId,
-        String hallName,
-        int numberOfRows,
-        int seatsPerRow
-    ) {
-        if (numberOfRows <= 0 || seatsPerRow <= 0) {
-            System.out.println("Rows and seats per row must be greater than zero.");
-            return;
+    // Create a hall
+    public boolean createHall(String hallId, String hallName,
+                              int numberOfRows, int seatsPerRow) {
+
+        if (hallId == null || hallId.trim().isEmpty()
+                || hallName == null || hallName.trim().isEmpty()
+                || numberOfRows <= 0 || seatsPerRow <= 0) {
+
+            System.out.println("Invalid hall details.");
+            return false;
         }
 
-        RowLinkedList rows = new RowLinkedList();
-
-        for (int i = 1; i <= numberOfRows; i++) {
-            rows.addRow(i, seatsPerRow);
+        if (hallMap.containsKey(hallId)) {
+            System.out.println("Hall ID already exists.");
+            return false;
         }
 
-        int capacity = rows.getTotalCapacity();
+        Hall newHall = new Hall(
+                hallId, hallName, numberOfRows, seatsPerRow
+        );
 
-        Hall hall = new Hall(hallId, hallName, capacity, rows);
-        addHall(hall);
+        hallMap.put(hallId, newHall);
+
+        System.out.println("Hall created successfully!");
+        return true;
     }
 
+    // Find hall
+    public Hall findHall(String hallId) {
+        return getHall(hallId);
+    }
+
+    // Display all halls
     public void displayAllHalls() {
+
         if (hallMap.isEmpty()) {
             System.out.println("No halls available.");
             return;
         }
 
         for (Hall hall : hallMap.values()) {
-            hall.displayHall();
             System.out.println("--------------------");
+            hall.displayHall();
         }
     }
 
+    // Get number of halls
     public int getHallCount() {
         return hallMap.size();
     }
 
+    // Calculate total capacity
     public int getTotalCapacity() {
+
         int total = 0;
 
         for (Hall hall : hallMap.values()) {
@@ -72,9 +92,5 @@ public class HallManager {
         }
 
         return total;
-    }
-
-    public Hall findHall(String hallId) {
-        return getHall(hallId);
     }
 }
