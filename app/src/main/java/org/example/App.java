@@ -1,8 +1,10 @@
 
 package org.example;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import org.example.member2.HallDAO;
 import org.example.member3.OperationHistoryManager;
 import org.example.member3.OperationStack;
 import org.example.member3.OperationsUI;
@@ -17,6 +19,19 @@ import org.example.services.AllocationService;
 public class App {
 
     public static void main(String[] args) {
+
+        // Check database connection
+        HallDAO hallDAO = new HallDAO();
+
+        if (!hallDAO.testConnection()) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Could not connect to Supabase. Check your database settings.",
+                    "Database Connection Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
 
         SwingUtilities.invokeLater(() -> {
 
