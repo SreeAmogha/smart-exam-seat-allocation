@@ -23,11 +23,30 @@ public class RowNode {
 
         // Add fixed number of seats
         for (int i = 1; i <= seatsPerRow; i++) {
-
             seats.addSeat(rowNumber, i);
         }
 
         prev = null;
         next = null;
+    }
+
+    // Get row number
+    public int getRowNumber() {
+        return rowNumber;
+    }
+
+    // Get seat list
+    public DoublyLinkedSeatList getSeatList() {
+        return seats;
+    }
+
+    // Get next row
+    public RowNode getNext() {
+        return next;
+    }
+
+    // Get previous row
+    public RowNode getPrev() {
+        return prev;
     }
 }

@@ -1,36 +1,28 @@
-
 package org.example.member2;
 
 public class Member2Test {
-
     public static void main(String[] args) {
 
-        // Create a hall's row list
-        RowLinkedList hall = new RowLinkedList();
+        HallManager manager = new HallManager();
 
-        // Add three rows, four seats each
-        hall.addRow(1, 4);
-        hall.addRow(2, 4);
-        hall.addRow(3, 4);
+        manager.createHall("H01", "Hall A", 3, 10);
+        manager.createHall("H02", "Hall B", 4, 10);
+        manager.createHall("H03", "Hall C", 5, 8);
 
-        System.out.println("EXAM HALL SEATING LAYOUT");
+        System.out.println("\nALL EXAMINATION HALLS");
+        manager.displayAllHalls();
 
-        // Display seating layout
-        hall.displayRows();
+        System.out.println("\nTotal Halls: " + manager.getHallCount());
+        System.out.println("Total Capacity: " + manager.getTotalCapacity());
 
-        // Display total rows
-        System.out.println(
-            "Total rows: " + hall.getRowCount()
-        );
+        System.out.println("\nSEARCHING FOR H02");
 
-        // Display total seats
-        System.out.println(
-            "Total capacity: " + hall.getTotalCapacity()
-        );
+        Hall hall = manager.findHall("H02");
 
-        // Display rows backwards
-        System.out.println("Rows in reverse:");
-
-        hall.displayRowsBackward();
+        if (hall != null) {
+            hall.displayHall();
+        } else {
+            System.out.println("Hall not found.");
+        }
     }
 }

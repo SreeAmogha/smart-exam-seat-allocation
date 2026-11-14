@@ -3,23 +3,20 @@ package org.example.member2;
 
 public class DoublyLinkedSeatList {
 
-    // First seat in the list
+    // First seat
     SeatNode head;
 
-    // Last seat in the list
+    // Last seat
     SeatNode tail;
 
     // Number of seats
     int size = 0;
 
-
-    // METHOD 1: Add a seat
+    // Add a seat
     public void addSeat(int rowNumber, int seatNumber) {
 
-        SeatNode newSeat =
-            new SeatNode(rowNumber, seatNumber);
+        SeatNode newSeat = new SeatNode(rowNumber, seatNumber);
 
-        // If the list is empty
         if (head == null) {
 
             head = newSeat;
@@ -27,19 +24,26 @@ public class DoublyLinkedSeatList {
 
         } else {
 
-            // Connect the new seat
             tail.next = newSeat;
             newSeat.prev = tail;
 
-            // Update tail
             tail = newSeat;
         }
 
         size++;
     }
 
+    // Get first seat
+    public SeatNode getHead() {
+        return head;
+    }
 
-    // METHOD 2: Display from first to last
+    // Get last seat
+    public SeatNode getTail() {
+        return tail;
+    }
+
+    // Display seats forward
     public void displayForward() {
 
         SeatNode current = head;
@@ -54,8 +58,7 @@ public class DoublyLinkedSeatList {
         System.out.println();
     }
 
-
-    // METHOD 3: Display from last to first
+    // Display seats backward
     public void displayBackward() {
 
         SeatNode current = tail;
@@ -70,10 +73,8 @@ public class DoublyLinkedSeatList {
         System.out.println();
     }
 
-
-    // METHOD 4: Return total seats
+    // Get total seats
     public int getSize() {
-
         return size;
     }
 }
