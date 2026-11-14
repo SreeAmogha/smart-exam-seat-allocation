@@ -1,17 +1,35 @@
+
 package org.example.models;
+
 import java.time.LocalDateTime;
-public class AllocationHistory{
+
+public class AllocationHistory {
+
     private int historyId;
-    private int examId;
+    private String examId;
     private String operationType;
     private String studentUSN1;
     private String studentUSN2;
-    private int oldSeatId1;
-    private int oldSeatId2;
-    private int newSeatId1;
-    private int newSeatId2;
+
+    private String oldSeatId1;
+    private String oldSeatId2;
+    private String newSeatId1;
+    private String newSeatId2;
+
     private LocalDateTime performedAt;
-    public AllocationHistory( int historyId,int examId,String operationType,String studentUSN1,String studentUSN2,int oldSeatId1,int oldSeatId2,int newSeatId1,int newSeatId2,LocalDateTime performedAt){
+
+    public AllocationHistory(
+            int historyId,
+            String examId,
+            String operationType,
+            String studentUSN1,
+            String studentUSN2,
+            String oldSeatId1,
+            String oldSeatId2,
+            String newSeatId1,
+            String newSeatId2,
+            LocalDateTime performedAt) {
+
         this.historyId = historyId;
         this.examId = examId;
         this.operationType = operationType;
@@ -23,45 +41,44 @@ public class AllocationHistory{
         this.newSeatId2 = newSeatId2;
         this.performedAt = performedAt;
     }
+
     public int getHistoryId() {
-    return historyId;
-}
+        return historyId;
+    }
 
-public int getExamId() {
-    return examId;
-}
+    public String getExamId() {
+        return examId;
+    }
 
-public String getOperationType() {
-    return operationType;
-}
+    public String getOperationType() {
+        return operationType;
+    }
 
-public String getStudentUSN1() {
-    return studentUSN1;
-}
+    public String getStudentUSN1() {
+        return studentUSN1;
+    }
 
-public String getStudentUSN2() {
-    return studentUSN2;
-}
+    public String getStudentUSN2() {
+        return studentUSN2;
+    }
 
-public int getOldSeatId1() {
-    return oldSeatId1;
-}
+    public String getOldSeatId1() {
+        return oldSeatId1;
+    }
 
-public int getOldSeatId2() {
-    return oldSeatId2;
-}
+    public String getOldSeatId2() {
+        return oldSeatId2;
+    }
 
-public int getNewSeatId1() {
-    return newSeatId1;
-}
+    public String getNewSeatId1() {
+        return newSeatId1;
+    }
 
-public int getNewSeatId2() {
-    return newSeatId2;
-}
+    public String getNewSeatId2() {
+        return newSeatId2;
+    }
 
-
-
-public LocalDateTime getPerformedAt() {
-    return performedAt;
-}
+    public LocalDateTime getPerformedAt() {
+        return performedAt;
+    }
 }

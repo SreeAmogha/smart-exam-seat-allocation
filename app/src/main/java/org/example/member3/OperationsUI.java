@@ -86,23 +86,15 @@ public class OperationsUI {
 
         swapButton.addActionListener(e -> {
 
-            try {
-                int examId = Integer.parseInt(
-                        examIdField.getText().trim());
+            String examId = examIdField.getText().trim();
+            String usn1 = student1Field.getText().trim();
+            String usn2 = student2Field.getText().trim();
 
-                String usn1 = student1Field.getText().trim();
-                String usn2 = student2Field.getText().trim();
+            OperationResult result =
+                    operationManager.swapSeats(examId, usn1, usn2);
 
-                OperationResult result =
-                        operationManager.swapSeats(examId, usn1, usn2);
-
-                JOptionPane.showMessageDialog(
-                        frame, result.getMessage());
-
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(
-                        frame, "Please enter a valid Exam ID.");
-            }
+            JOptionPane.showMessageDialog(
+                    frame, result.getMessage());
         });
 
         swapPanel.add(new JLabel(""));
@@ -136,29 +128,17 @@ public class OperationsUI {
 
         reassignButton.addActionListener(e -> {
 
-            try {
-                int examId = Integer.parseInt(
-                        reassignExamIdField.getText().trim());
+            String examId = reassignExamIdField.getText().trim();
+            String hallId = hallIdField.getText().trim();
+            String seatId = seatIdField.getText().trim();
+            String usn = usnField.getText().trim();
 
-                int hallId = Integer.parseInt(
-                        hallIdField.getText().trim());
+            OperationResult result =
+                    operationManager.reassignSeat(
+                            examId, usn, hallId, seatId);
 
-                int seatId = Integer.parseInt(
-                        seatIdField.getText().trim());
-
-                String usn = usnField.getText().trim();
-
-                OperationResult result =
-                        operationManager.reassignSeat(
-                                examId, usn, hallId, seatId);
-
-                JOptionPane.showMessageDialog(
-                        frame, result.getMessage());
-
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(
-                        frame, "Please enter valid numeric IDs.");
-            }
+            JOptionPane.showMessageDialog(
+                    frame, result.getMessage());
         });
 
         reassignPanel.add(new JLabel(""));

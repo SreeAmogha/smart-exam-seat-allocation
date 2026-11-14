@@ -21,7 +21,6 @@ public class App {
 
     public static void main(String[] args) {
 
-        // Check database connection
         HallDAO hallDAO = new HallDAO();
 
         if (!hallDAO.testConnection()) {
@@ -36,16 +35,16 @@ public class App {
 
         SwingUtilities.invokeLater(() -> {
 
+            // Temporary service until the database-backed
+            // Operations service is implemented.
             AllocationService allocationService =
                     new TestAllocationService();
 
-            // Create operation stack and history manager
             OperationStack operationStack = new OperationStack();
 
             OperationHistoryManager historyManager =
                     new OperationHistoryManager();
 
-            // Create operation manager
             SeatOperationManager operationManager =
                     new SeatOperationManager(
                             allocationService,
@@ -53,11 +52,9 @@ public class App {
                             historyManager
                     );
 
-            // Create report generator
             ReportGenerator reportGenerator =
                     new ReportGenerator(historyManager);
 
-            // Open all three GUI windows
             new SeatAllocationUI().setVisible(true);
             new OperationsUI(operationManager);
             new ReportsUI(reportGenerator);
@@ -69,20 +66,16 @@ public class App {
 
         @Override
         public OperationResult swapAllocations(
-                int examId, String usn1, String usn2) {
-
+                String examId, String usn1, String usn2) {
             return new OperationResult(
-                    true, "Swap successful! (Test mode)"
-            );
+                    true, "Swap successful! (Test mode)");
         }
 
         @Override
         public OperationResult reassignAllocation(
-                int examId, String usn, int hallId, int seatId) {
-
+                String examId, String usn, String hallId, String seatId) {
             return new OperationResult(
-                    true, "Reassignment successful! (Test mode)"
-            );
+                    true, "Reassignment successful! (Test mode)");
         }
 
         @Override
@@ -96,7 +89,8 @@ public class App {
         }
 
         @Override
-        public SeatLocation getCurrentSeat(int examId, String usn) {
+        public SeatLocation getCurrentSeat(
+                String examId, String usn) {
 
             if (usn == null) {
                 return null;
@@ -104,13 +98,19 @@ public class App {
 
             switch (usn.toUpperCase()) {
                 case "USN001":
-                    return new SeatLocation(1, 1, 1, 1);
+                    return new SeatLocation(
+                            "HALL_TEST_01", 1, 1,
+                            "HALL_TEST_01_R1_S1");
 
                 case "USN002":
-                    return new SeatLocation(1, 1, 2, 2);
+                    return new SeatLocation(
+                            "HALL_TEST_01", 1, 2,
+                            "HALL_TEST_01_R1_S2");
 
                 case "USN003":
-                    return new SeatLocation(1, 1, 3, 3);
+                    return new SeatLocation(
+                            "HALL_TEST_01", 1, 3,
+                            "HALL_TEST_01_R1_S3");
 
                 default:
                     return null;
