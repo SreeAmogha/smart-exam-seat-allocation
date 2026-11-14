@@ -156,7 +156,6 @@ public class ReportsUI {
 
         // BUTTON ACTIONS
         examReportButton.addActionListener(e -> loadExamReport());
-
         studentReportButton.addActionListener(e -> loadStudentHistory());
 
         frame.setVisible(true);
@@ -164,57 +163,47 @@ public class ReportsUI {
 
     private void loadExamReport() {
 
-        try {
-            int examId = Integer.parseInt(
-                    examIdField.getText().trim()
-            );
+        String examId = examIdField.getText().trim();
 
-            if (examId <= 0) {
-                JOptionPane.showMessageDialog(
-                        frame, "Exam ID must be positive."
-                );
-                return;
-            }
-
-            int totalOperations =
-                    reportGenerator.getTotalOperations(examId);
-
-            int totalSwaps =
-                    reportGenerator.getTotalSwaps(examId);
-
-            int totalReassignments =
-                    reportGenerator.getTotalReassignments(examId);
-
-            int totalUndo =
-                    reportGenerator.getTotalUndoOperations(examId);
-
-            totalOperationsLabel.setText(
-                    "Total Operations: " + totalOperations
-            );
-
-            totalSwapsLabel.setText(
-                    "Total Swaps: " + totalSwaps
-            );
-
-            totalReassignmentsLabel.setText(
-                    "Total Reassignments: " + totalReassignments
-            );
-
-            totalUndoLabel.setText(
-                    "Total Undo Operations: " + totalUndo
-            );
-
-            List<AllocationHistory> history =
-                    reportGenerator.getExamHistory(examId);
-
-            displayHistory(history);
-
-        } catch (NumberFormatException ex) {
-
+        if (examId.isBlank()) {
             JOptionPane.showMessageDialog(
-                    frame, "Please enter a valid Exam ID."
+                    frame, "Please enter an Exam ID."
             );
+            return;
         }
+
+        int totalOperations =
+                reportGenerator.getTotalOperations(examId);
+
+        int totalSwaps =
+                reportGenerator.getTotalSwaps(examId);
+
+        int totalReassignments =
+                reportGenerator.getTotalReassignments(examId);
+
+        int totalUndo =
+                reportGenerator.getTotalUndoOperations(examId);
+
+        totalOperationsLabel.setText(
+                "Total Operations: " + totalOperations
+        );
+
+        totalSwapsLabel.setText(
+                "Total Swaps: " + totalSwaps
+        );
+
+        totalReassignmentsLabel.setText(
+                "Total Reassignments: " + totalReassignments
+        );
+
+        totalUndoLabel.setText(
+                "Total Undo Operations: " + totalUndo
+        );
+
+        List<AllocationHistory> history =
+                reportGenerator.getExamHistory(examId);
+
+        displayHistory(history);
     }
 
     private void loadStudentHistory() {
