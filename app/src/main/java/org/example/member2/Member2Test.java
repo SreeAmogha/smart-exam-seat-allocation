@@ -1,5 +1,5 @@
-
 package org.example.member2;
+
 public class Member2Test {
 
     public static void main(String[] args) {
