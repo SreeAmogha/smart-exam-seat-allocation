@@ -4,10 +4,8 @@ package org.example;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-import org.example.member2.Hall;
 import org.example.member2.HallDAO;
-import org.example.member2.SeatAllocator;
-import org.example.member2.StudentManager;
+import org.example.member2.SeatAllocationUI;
 import org.example.member3.OperationHistoryManager;
 import org.example.member3.OperationStack;
 import org.example.member3.OperationsUI;
@@ -37,39 +35,7 @@ public class App {
         }
 
         SwingUtilities.invokeLater(() -> {
-            StudentManager studentManager = new StudentManager();
 
-System.out.println("Total registered students: "
-        + studentManager.getStudentCount());
-            // Temporary test service
-            if (!studentManager.getAllStudents().isEmpty()) {
-
-    Hall testHall = new Hall("HALL_TEST_01", "Test Hall", 5, 5);
-
-    SeatAllocator seatAllocator = new SeatAllocator();
-
-    boolean allocationComplete = seatAllocator.allocateHall(
-            testHall,
-            studentManager.getAllStudents()
-    );
-    if (allocationComplete) {
-
-    boolean saved = seatAllocator.saveAllocations(
-        "EXAM001",
-        testHall
-    );
-
-    System.out.println("Allocations saved to database: " + saved);
-
-} else {
-    System.out.println("Some students could not be allocated.");
-}
-
-    int unallocated = seatAllocator.getUnallocatedStudents().size();
-
-    System.out.println("Allocation completed: " + allocationComplete);
-    System.out.println("Unallocated students: " + unallocated);
-}
             AllocationService allocationService =
                     new TestAllocationService();
 
@@ -91,7 +57,8 @@ System.out.println("Total registered students: "
             ReportGenerator reportGenerator =
                     new ReportGenerator(historyManager);
 
-            // Open both GUIs
+            // Open all three GUI windows
+            new SeatAllocationUI().setVisible(true);
             new OperationsUI(operationManager);
             new ReportsUI(reportGenerator);
         });
