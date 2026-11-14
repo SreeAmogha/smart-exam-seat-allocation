@@ -1,20 +1,16 @@
 
 package org.example.member3;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.example.models.AllocationHistory;
 
 public class OperationHistoryManager {
 
-    private List<AllocationHistory> historyList;
-    private int nextHistoryId;
+    private final OperationHistoryDAO historyDAO;
 
     public OperationHistoryManager() {
-        historyList = new ArrayList<>();
-        nextHistoryId = 1;
+        historyDAO = new OperationHistoryDAO();
     }
 
     public void addHistory(
@@ -27,8 +23,7 @@ public class OperationHistoryManager {
             String newSeatId1,
             String newSeatId2) {
 
-        AllocationHistory history = new AllocationHistory(
-                nextHistoryId,
+        boolean saved = historyDAO.saveHistory(
                 examId,
                 operationType,
                 studentUSN1,
@@ -36,45 +31,22 @@ public class OperationHistoryManager {
                 oldSeatId1,
                 oldSeatId2,
                 newSeatId1,
-                newSeatId2,
-                LocalDateTime.now());
+                newSeatId2);
 
-        historyList.add(history);
-        nextHistoryId++;
+        if (!saved) {
+            System.out.println("Operation history could not be saved.");
+        }
     }
 
     public List<AllocationHistory> getAllHistory() {
-        return new ArrayList<>(historyList);
+        return historyDAO.getAllHistory();
     }
 
     public List<AllocationHistory> getHistoryByExam(String examId) {
-
-        List<AllocationHistory> filteredHistory = new ArrayList<>();
-
-        for (AllocationHistory history : historyList) {
-            if (history.getExamId().equals(examId)) {
-                filteredHistory.add(history);
-            }
-        }
-
-        return filteredHistory;
+        return historyDAO.getHistoryByExam(examId);
     }
 
     public List<AllocationHistory> getHistoryByStudent(String usn) {
-
-        List<AllocationHistory> filteredHistory = new ArrayList<>();
-
-        if (usn == null || usn.isBlank()) {
-            return filteredHistory;
-        }
-
-        for (AllocationHistory history : historyList) {
-            if (usn.equalsIgnoreCase(history.getStudentUSN1())
-                    || usn.equalsIgnoreCase(history.getStudentUSN2())) {
-                filteredHistory.add(history);
-            }
-        }
-
-        return filteredHistory;
+        return historyDAO.getHistoryByStudent(usn);
     }
 }
