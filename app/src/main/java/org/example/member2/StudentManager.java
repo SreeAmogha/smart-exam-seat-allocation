@@ -12,11 +12,16 @@ public class StudentManager {
     private HashMap<String, Student> studentMap;
     private StudentDAO studentDAO;
 
-    public StudentManager() {
-        studentMap = new HashMap<>();
-        studentDAO = new StudentDAO();
+public StudentManager() {
+    studentMap = new HashMap<>();
+    studentDAO = new StudentDAO();
+
+    for (Student student : studentDAO.getAllStudents()) {
+        studentMap.put(student.getUsn().toUpperCase(), student);
     }
 
+    System.out.println("Loaded " + studentMap.size() + " students.");
+}
     // Register a student in the database and HashMap
     public boolean registerStudent(Student student) {
 
