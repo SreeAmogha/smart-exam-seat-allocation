@@ -28,8 +28,11 @@ import org.example.member1.Student;
 public class SeatAllocationUI extends JFrame {
 
     private ExamAllocationDAO dao = new ExamAllocationDAO();
+
     private JComboBox<String[]> examCombo;
     private JButton allocateButton;
+    private JButton refreshButton;
+
     private JPanel hallPanel;
     private JLabel statusLabel;
 
@@ -62,8 +65,8 @@ public class SeatAllocationUI extends JFrame {
 
                 if (value instanceof String[]) {
                     String[] exam = (String[]) value;
-                    setText(exam[1] + " - " + exam[2] +
-                            " (" + exam[3] + ")");
+                    setText(exam[1] + " - " + exam[2]
+                            + " (" + exam[3] + ")");
                 }
 
                 return this;
@@ -75,6 +78,9 @@ public class SeatAllocationUI extends JFrame {
         allocateButton = new JButton("Allocate Seats");
         allocateButton.setEnabled(false);
         topPanel.add(allocateButton);
+
+        refreshButton = new JButton("Refresh Layout");
+        topPanel.add(refreshButton);
 
         statusLabel = new JLabel("Select an examination.");
 
@@ -90,6 +96,8 @@ public class SeatAllocationUI extends JFrame {
         examCombo.addActionListener(e -> loadSelectedExam());
 
         allocateButton.addActionListener(e -> allocateSeats());
+
+        refreshButton.addActionListener(e -> loadSelectedExam());
     }
 
     private void loadExaminations() {
@@ -108,38 +116,44 @@ public class SeatAllocationUI extends JFrame {
     private void loadSelectedExam() {
 
         String[] selectedExam =
-            (String[]) examCombo.getSelectedItem();
+                (String[]) examCombo.getSelectedItem();
 
         if (selectedExam == null) {
             return;
         }
 
         String examId = selectedExam[0];
+ExamAllocationDAO.ExamData data =
+        dao.loadExamData(examId);
 
-        currentHalls = dao.getHallsForExam(examId);
-        currentStudents = dao.getRegisteredStudents(examId);
+currentHalls = data.halls;
+currentStudents = data.students;
 
+int savedCount = data.allocatedCount;
         hallPanel.removeAll();
 
         allocateButton.setEnabled(
-            !currentHalls.isEmpty() && !currentStudents.isEmpty()
+                !currentHalls.isEmpty()
+                && !currentStudents.isEmpty()
+                && savedCount == 0
         );
 
         statusLabel.setText(
-            "Registered Students: " + currentStudents.size()
-            + " | Assigned Halls: " + currentHalls.size()
+                "Registered Students: " + currentStudents.size()
+                + " | Assigned Halls: " + currentHalls.size()
+                + " | Allocated: " + savedCount
         );
 
         if (currentHalls.isEmpty()) {
             hallPanel.add(new JLabel(
-                "No halls assigned to this examination."
-            ));
+                    "No halls assigned to this examination."));
+        } else {
+            displayHallLayouts();
         }
 
         if (currentStudents.isEmpty()) {
             hallPanel.add(new JLabel(
-                "No students registered for this examination."
-            ));
+                    "No students registered for this examination."));
         }
 
         hallPanel.revalidate();
@@ -149,7 +163,7 @@ public class SeatAllocationUI extends JFrame {
     private void allocateSeats() {
 
         String[] selectedExam =
-            (String[]) examCombo.getSelectedItem();
+                (String[]) examCombo.getSelectedItem();
 
         if (selectedExam == null) {
             return;
@@ -160,9 +174,8 @@ public class SeatAllocationUI extends JFrame {
         SeatAllocator allocator = new SeatAllocator();
 
         List<Student> unallocated =
-            allocator.allocateAcrossHalls(
-                currentHalls, currentStudents
-            );
+                allocator.allocateAcrossHalls(
+                        currentHalls, currentStudents);
 
         boolean saved = true;
 
@@ -172,25 +185,18 @@ public class SeatAllocationUI extends JFrame {
             }
         }
 
-        displayHallLayouts();
-
         int allocatedCount =
-            currentStudents.size() - unallocated.size();
+                currentStudents.size() - unallocated.size();
 
-        statusLabel.setText(
-            "Allocated: " + allocatedCount
-            + " | Unallocated: " + unallocated.size()
+        JOptionPane.showMessageDialog(
+                this,
+                "Allocation completed!\n"
+                + "Allocated students: " + allocatedCount + "\n"
+                + "Unallocated students: " + unallocated.size() + "\n"
+                + "Database save: " + (saved ? "Successful" : "Failed")
         );
 
-        allocateButton.setEnabled(false);
-
-        String message =
-            "Allocation completed!\n"
-            + "Allocated students: " + allocatedCount + "\n"
-            + "Unallocated students: " + unallocated.size() + "\n"
-            + "Database save: " + (saved ? "Successful" : "Failed");
-
-        JOptionPane.showMessageDialog(this, message);
+        loadSelectedExam();
     }
 
     private void displayHallLayouts() {
@@ -200,18 +206,16 @@ public class SeatAllocationUI extends JFrame {
         for (Hall hall : currentHalls) {
 
             JPanel oneHall = new JPanel(
-                new GridLayout(
-                    hall.getNumberOfRows(),
-                    hall.getSeatsPerRow(),
-                    8, 8
-                )
+                    new GridLayout(
+                            hall.getNumberOfRows(),
+                            hall.getSeatsPerRow(),
+                            8, 8
+                    )
             );
 
             oneHall.setBorder(
-                BorderFactory.createTitledBorder(
-                    hall.getHallName()
-                )
-            );
+                    BorderFactory.createTitledBorder(
+                            hall.getHallName()));
 
             RowNode row = hall.getRows().getHead();
 
@@ -222,30 +226,24 @@ public class SeatAllocationUI extends JFrame {
                 while (seat != null) {
 
                     String text = "R" + seat.getRowNumber()
-                        + " S" + seat.getSeatNumber();
+                            + " S" + seat.getSeatNumber();
 
                     if (seat.isOccupied()) {
                         text += "\n" + seat.getAllocatedUsn();
                     }
 
                     JLabel seatLabel = new JLabel(
-                        text, SwingConstants.CENTER
-                    );
+                            text, SwingConstants.CENTER);
 
                     seatLabel.setOpaque(true);
                     seatLabel.setBorder(
-                        BorderFactory.createLineBorder(Color.GRAY)
-                    );
+                            BorderFactory.createLineBorder(Color.GRAY));
 
-                    if (seat.isOccupied()) {
-                        seatLabel.setBackground(
-                            new Color(180, 230, 180)
-                        );
-                    } else {
-                        seatLabel.setBackground(
-                            new Color(230, 230, 230)
-                        );
-                    }
+                    seatLabel.setBackground(
+                            seat.isOccupied()
+                            ? new Color(180, 230, 180)
+                            : new Color(230, 230, 230)
+                    );
 
                     oneHall.add(seatLabel);
 

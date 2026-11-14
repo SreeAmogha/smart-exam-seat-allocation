@@ -18,15 +18,28 @@ public class ExamAllocationDAO {
         String user = System.getenv("SUPABASE_DB_USER");
         String password = System.getenv("SUPABASE_DB_PASSWORD");
 
+        if (url == null || user == null || password == null) {
+            throw new SQLException("Database environment variables are missing.");
+        }
+
         return DriverManager.getConnection(url, user, password);
     }
 
-    // Retrieve all examinations
+    // Holds all data loaded for one examination
+    public static class ExamData {
+        public List<Hall> halls = new ArrayList<>();
+        public List<Student> students = new ArrayList<>();
+        public int allocatedCount;
+    }
+
     public List<String[]> getAllExams() {
         List<String[]> exams = new ArrayList<>();
 
-        String sql = "SELECT exam_id, exam_name, exam_date, session " +
-                     "FROM examinations ORDER BY exam_date";
+        String sql = """
+            SELECT exam_id, exam_name, exam_date, session
+            FROM examinations
+            ORDER BY exam_date
+            """;
 
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -48,72 +61,185 @@ public class ExamAllocationDAO {
         return exams;
     }
 
-    // Retrieve halls assigned to a particular examination
-    public List<Hall> getHallsForExam(String examId) {
-        List<Hall> halls = new ArrayList<>();
+    // Load halls, students and saved allocations using ONE connection
+    public ExamData loadExamData(String examId) {
 
-        String sql = "SELECT h.hall_id, h.hall_name, " +
-                     "h.number_of_rows, h.seats_per_row " +
-                     "FROM halls h " +
-                     "JOIN exam_halls eh ON h.hall_id = eh.hall_id " +
-                     "WHERE eh.exam_id = ?";
+        ExamData data = new ExamData();
 
-        try (Connection con = getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = getConnection()) {
 
-            ps.setString(1, examId);
+            // 1. Load halls
+            String hallSql = """
+                SELECT h.hall_id, h.hall_name,
+                       h.number_of_rows, h.seats_per_row
+                FROM halls h
+                JOIN exam_halls eh ON h.hall_id = eh.hall_id
+                WHERE eh.exam_id = ?
+                """;
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    halls.add(new Hall(
-                        rs.getString("hall_id"),
-                        rs.getString("hall_name"),
-                        rs.getInt("number_of_rows"),
-                        rs.getInt("seats_per_row")
-                    ));
+            try (PreparedStatement ps = con.prepareStatement(hallSql)) {
+                ps.setString(1, examId);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        data.halls.add(new Hall(
+                            rs.getString("hall_id"),
+                            rs.getString("hall_name"),
+                            rs.getInt("number_of_rows"),
+                            rs.getInt("seats_per_row")
+                        ));
+                    }
+                }
+            }
+
+            // 2. Load registered students
+            String studentSql = """
+                SELECT DISTINCT s.usn, s.name, s.branch,
+                       s.semester, s.section
+                FROM students s
+                JOIN exam_registrations er
+                    ON s.student_id = er.student_id
+                WHERE er.exam_id = ?
+                ORDER BY s.usn
+                """;
+
+            try (PreparedStatement ps = con.prepareStatement(studentSql)) {
+                ps.setString(1, examId);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        data.students.add(new Student(
+                            rs.getString("usn"),
+                            rs.getString("name"),
+                            rs.getString("branch"),
+                            rs.getInt("semester"),
+                            rs.getString("section")
+                        ));
+                    }
+                }
+            }
+
+            // 3. Load saved seat allocations
+            String allocationSql = """
+                SELECT s.hall_id, s.row_number,
+                       s.column_number, st.usn
+                FROM allocations a
+                JOIN exam_registrations er
+                    ON a.registration_id = er.registration_id
+                JOIN students st
+                    ON er.student_id = st.student_id
+                JOIN seats s
+                    ON a.seat_id = s.seat_id
+                WHERE a.exam_id = ?
+                  AND a.status = 'allocated'
+                """;
+
+            try (PreparedStatement ps = con.prepareStatement(allocationSql)) {
+                ps.setString(1, examId);
+
+                try (ResultSet rs = ps.executeQuery()) {
+
+                    while (rs.next()) {
+
+                        String hallId = rs.getString("hall_id");
+                        int rowNumber = rs.getInt("row_number");
+                        int columnNumber = rs.getInt("column_number");
+                        String usn = rs.getString("usn");
+
+                        for (Hall hall : data.halls) {
+
+                            if (!hall.getHallId().equals(hallId)) {
+                                continue;
+                            }
+
+                            RowNode row = hall.getRows().getHead();
+
+                            while (row != null) {
+
+                                if (row.getRowNumber() == rowNumber) {
+
+                                    SeatNode seat =
+                                        row.getSeatList().getHead();
+
+                                    while (seat != null) {
+
+                                        if (seat.getSeatNumber() == columnNumber) {
+                                            seat.setAssignedUsn(usn);
+                                            data.allocatedCount++;
+                                            break;
+                                        }
+
+                                        seat = seat.getNext();
+                                    }
+
+                                    break;
+                                }
+
+                                row = row.getNext();
+                            }
+
+                            break;
+                        }
+                    }
                 }
             }
 
         } catch (SQLException e) {
-            System.out.println("Error loading halls: " + e.getMessage());
+            System.out.println("Error loading examination data: "
+                    + e.getMessage());
         }
 
-        return halls;
+        return data;
     }
 
-    // Retrieve only students registered for the selected examination
+    // Existing methods retained for compatibility
+    public List<Hall> getHallsForExam(String examId) {
+        return loadExamData(examId).halls;
+    }
+
     public List<Student> getRegisteredStudents(String examId) {
-        List<Student> students = new ArrayList<>();
+        return loadExamData(examId).students;
+    }
 
-        String sql = "SELECT DISTINCT s.usn, s.name, s.branch, " +
-                     "s.semester, s.section " +
-                     "FROM students s " +
-                     "JOIN exam_registrations er " +
-                     "ON s.student_id = er.student_id " +
-                     "WHERE er.exam_id = ? " +
-                     "ORDER BY s.usn";
+    public int loadSavedAllocations(String examId, List<Hall> halls) {
+        ExamData data = loadExamData(examId);
 
-        try (Connection con = getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        for (Hall target : halls) {
+            for (Hall loaded : data.halls) {
+                if (target.getHallId().equals(loaded.getHallId())) {
+                    RowNode row = loaded.getRows().getHead();
 
-            ps.setString(1, examId);
+                    while (row != null) {
+                        SeatNode seat = row.getSeatList().getHead();
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    students.add(new Student(
-                        rs.getString("usn"),
-                        rs.getString("name"),
-                        rs.getString("branch"),
-                        rs.getInt("semester"),
-                        rs.getString("section")
-                    ));
+                        while (seat != null) {
+                            if (seat.isOccupied()) {
+                                RowNode targetRow = target.getRows().getHead();
+
+                                while (targetRow != null) {
+                                    if (targetRow.getRowNumber() == row.getRowNumber()) {
+                                        SeatNode targetSeat = targetRow.getSeatList().getHead();
+
+                                        while (targetSeat != null) {
+                                            if (targetSeat.getSeatNumber() == seat.getSeatNumber()) {
+                                                targetSeat.setAssignedUsn(seat.getAllocatedUsn());
+                                                break;
+                                            }
+                                            targetSeat = targetSeat.getNext();
+                                        }
+                                        break;
+                                    }
+                                    targetRow = targetRow.getNext();
+                                }
+                            }
+                            seat = seat.getNext();
+                        }
+                        row = row.getNext();
+                    }
                 }
             }
-
-        } catch (SQLException e) {
-            System.out.println("Error loading registered students: " + e.getMessage());
         }
 
-        return students;
+        return data.allocatedCount;
     }
 }
