@@ -5,6 +5,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.example.member2.HallDAO;
+import org.example.member2.StudentManager;
 import org.example.member3.OperationHistoryManager;
 import org.example.member3.OperationStack;
 import org.example.member3.OperationsUI;
@@ -34,7 +35,10 @@ public class App {
         }
 
         SwingUtilities.invokeLater(() -> {
+            StudentManager studentManager = new StudentManager();
 
+System.out.println("Total registered students: "
+        + studentManager.getStudentCount());
             // Temporary test service
             AllocationService allocationService =
                     new TestAllocationService();

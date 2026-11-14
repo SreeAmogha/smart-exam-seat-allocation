@@ -6,7 +6,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
-
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import org.example.member1.Student;
 
 public class StudentDAO {
@@ -65,4 +67,39 @@ public class StudentDAO {
             return false;
         }
     }
+
+public List<Student> getAllStudents() {
+
+    List<Student> students = new ArrayList<>();
+
+    String query = """
+        SELECT usn, name, branch, semester, section
+        FROM students
+        ORDER BY usn
+        """;
+
+    try (Connection conn = getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(query);
+         ResultSet rs = pstmt.executeQuery()) {
+
+        while (rs.next()) {
+            Student student = new Student(
+                rs.getString("usn"),
+                rs.getString("name"),
+                rs.getString("branch"),
+                rs.getInt("semester"),
+                rs.getString("section")
+            );
+
+            students.add(student);
+        }
+
+    } catch (SQLException e) {
+        System.out.println("Could not retrieve students: " + e.getMessage());
+    }
+
+    return students;
 }
+
+}
+
