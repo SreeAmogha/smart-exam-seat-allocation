@@ -8,7 +8,6 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -20,11 +19,9 @@ import javax.swing.table.DefaultTableModel;
 
 import org.example.models.AllocationHistory;
 
-public class ReportsUI {
+public class ReportsUI extends JPanel{
 
     private ReportGenerator reportGenerator;
-
-    private JFrame frame;
 
     private JTextField examIdField;
     private JTextField studentUSNField;
@@ -39,17 +36,12 @@ public class ReportsUI {
 
     public ReportsUI(ReportGenerator reportGenerator) {
         this.reportGenerator = reportGenerator;
-        createWindow();
+        createPanel();
     }
 
-    private void createWindow() {
-
-        frame = new JFrame("Exam Reports");
-        frame.setSize(1000, 700);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.setLayout(new BorderLayout(10, 10));
-
+    private void createPanel() {
+        setLayout(new BorderLayout());
+        
         // TITLE
         JLabel titleLabel = new JLabel(
                 "Exam Reports and Operation History",
@@ -61,7 +53,7 @@ public class ReportsUI {
                 BorderFactory.createEmptyBorder(20, 10, 10, 10)
         );
 
-        frame.add(titleLabel, BorderLayout.NORTH);
+        add(titleLabel, BorderLayout.NORTH);
 
         // MAIN PANEL
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -69,7 +61,7 @@ public class ReportsUI {
                 BorderFactory.createEmptyBorder(10, 20, 20, 20)
         );
 
-        frame.add(mainPanel, BorderLayout.CENTER);
+        add(mainPanel, BorderLayout.CENTER);
 
         // SEARCH PANEL
         JPanel searchPanel = new JPanel(new GridLayout(2, 3, 10, 10));
@@ -158,7 +150,7 @@ public class ReportsUI {
         examReportButton.addActionListener(e -> loadExamReport());
         studentReportButton.addActionListener(e -> loadStudentHistory());
 
-        frame.setVisible(true);
+        setVisible(true);
     }
 
     private void loadExamReport() {
@@ -167,7 +159,7 @@ public class ReportsUI {
 
         if (examId.isBlank()) {
             JOptionPane.showMessageDialog(
-                    frame, "Please enter an Exam ID."
+                    this, "Please enter an Exam ID."
             );
             return;
         }
@@ -212,7 +204,7 @@ public class ReportsUI {
 
         if (usn.isBlank()) {
             JOptionPane.showMessageDialog(
-                    frame, "Please enter a Student USN."
+                    this, "Please enter a Student USN."
             );
             return;
         }

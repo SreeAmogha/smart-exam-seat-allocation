@@ -1,6 +1,11 @@
 package org.example.member1;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,9 +15,17 @@ public class StudentDAO {
     private static final String USER = "postgres";
     private static final String PASSWORD = "YOUR_SUPABASE_PASSWORD";
 
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+   private Connection getConnection() throws SQLException {
+    String url = System.getenv("SUPABASE_DB_URL");
+    String user = System.getenv("SUPABASE_DB_USER");
+    String password = System.getenv("SUPABASE_DB_PASSWORD");
+
+    if (url == null || user == null || password == null) {
+        throw new SQLException("Database environment variables are missing.");
     }
+
+    return DriverManager.getConnection(url, user, password);
+}
 
     public boolean insertStudent(Student student) {
         String query = "INSERT INTO students (usn, name, branch, semester, section) VALUES (?, ?, ?, ?, ?)";

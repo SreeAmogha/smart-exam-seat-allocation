@@ -7,7 +7,6 @@ import java.awt.GridLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -16,11 +15,9 @@ import javax.swing.SwingConstants;
 
 import org.example.models.OperationResult;
 
-public class OperationsUI {
+public class OperationsUI extends JPanel {
 
     private SeatOperationManager operationManager;
-
-    private JFrame frame;
 
     private JTextField examIdField;
     private JTextField student1Field;
@@ -35,17 +32,12 @@ public class OperationsUI {
 
     public OperationsUI(SeatOperationManager operationManager) {
         this.operationManager = operationManager;
-        createWindow();
+        createPanel();
     }
 
-    private void createWindow() {
+    private void createPanel() {
 
-        frame = new JFrame("Exam Seat Operations");
-        frame.setSize(800, 600);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.setLayout(new BorderLayout());
-
+        setLayout(new BorderLayout());
         // Title
         JLabel titleLabel = new JLabel(
                 "Seat Operations", SwingConstants.CENTER);
@@ -54,7 +46,7 @@ public class OperationsUI {
         titleLabel.setBorder(
                 BorderFactory.createEmptyBorder(20, 10, 20, 10));
 
-        frame.add(titleLabel, BorderLayout.NORTH);
+        add(titleLabel, BorderLayout.NORTH);
 
         // Main panel
         JPanel mainPanel = new JPanel();
@@ -62,7 +54,7 @@ public class OperationsUI {
         mainPanel.setBorder(
                 BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
-        frame.add(mainPanel, BorderLayout.CENTER);
+        add(mainPanel, BorderLayout.CENTER);
 
         // SWAP SEATS PANEL
         JPanel swapPanel = new JPanel();
@@ -94,7 +86,7 @@ public class OperationsUI {
                     operationManager.swapSeats(examId, usn1, usn2);
 
             JOptionPane.showMessageDialog(
-                    frame, result.getMessage());
+                    this, result.getMessage());
         });
 
         swapPanel.add(new JLabel(""));
@@ -138,7 +130,7 @@ public class OperationsUI {
                             examId, usn, hallId, seatId);
 
             JOptionPane.showMessageDialog(
-                    frame, result.getMessage());
+                    this, result.getMessage());
         });
 
         reassignPanel.add(new JLabel(""));
@@ -159,10 +151,10 @@ public class OperationsUI {
 
             if (success) {
                 JOptionPane.showMessageDialog(
-                        frame, "Last operation successfully undone.");
+                        this, "Last operation successfully undone.");
             } else {
                 JOptionPane.showMessageDialog(
-                        frame, "No operation to undo or undo failed.");
+                        this, "No operation to undo or undo failed.");
             }
         });
 
@@ -174,8 +166,7 @@ public class OperationsUI {
         statusLabel.setBorder(
                 BorderFactory.createEmptyBorder(5, 15, 10, 15));
 
-        frame.add(statusLabel, BorderLayout.SOUTH);
+        add(statusLabel, BorderLayout.SOUTH);
 
-        frame.setVisible(true);
     }
 }

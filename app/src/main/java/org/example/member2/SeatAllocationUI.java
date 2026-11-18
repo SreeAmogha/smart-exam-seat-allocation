@@ -15,7 +15,6 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -25,7 +24,7 @@ import javax.swing.SwingConstants;
 
 import org.example.member1.Student;
 
-public class SeatAllocationUI extends JFrame {
+public class SeatAllocationUI extends JPanel  {
 
     private ExamAllocationDAO dao = new ExamAllocationDAO();
 
@@ -41,10 +40,7 @@ public class SeatAllocationUI extends JFrame {
 
     public SeatAllocationUI() {
 
-        setTitle("Smart Exam Seat Allocation");
-        setSize(900, 650);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel();
 
